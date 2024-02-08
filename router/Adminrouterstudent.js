@@ -47,9 +47,12 @@
 
     Admin.get('/searchStudents', async (req, res) => {
     try {
-        const searchTerm = req.query.searchTerm;
+        const searchTerm = req.query.searchTerm;   
+           const adminId = req.admin._id;
 
-        const studentdata = await Students.find({ firstname: { $regex: searchTerm, $options: 'i' } });
+        const studentdata = await Students.find(
+          
+            {  Student: adminId, firstname: { $regex: searchTerm, $options: 'i' } });
 
         res.status(200).json({ data: studentdata, success: true });
     } catch (error) {
