@@ -1,7 +1,7 @@
 const Students = require('../Models/student');
 async function NewStudentHanddle (req,res) {
     
-  console.log("this is working");
+ 
 
     try {
   
@@ -22,6 +22,13 @@ async function NewStudentHanddle (req,res) {
         postcode,
         address,
       } = req.body;
+
+
+   
+
+
+      const adminId = req.admin._id;
+    
   
   
       // Generate a random username and password
@@ -52,7 +59,8 @@ async function NewStudentHanddle (req,res) {
         StudentID: studentID,
         Admission_date: admissionDate,
         password:password, // Hash the generated password
-        photo: photoPath, // Save the file path or null if it doesn't exist
+        photo: photoPath,
+        Student: adminId, // Save the file path or null if it doesn't exist
       });
   
       // Save the student to the database

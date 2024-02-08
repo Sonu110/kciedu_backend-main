@@ -11,6 +11,11 @@ const studentPaymentSchema = new mongoose.Schema({
     totalBalance: { type: Number, required: true },
     paymentMode: { type: String, required: true },
     note: { type: String },
+    studentPaymentsdata: 
+    {type: mongoose.Schema.Types.ObjectId,
+        ref: "userdata",
+        required: true, }
+        ,
     createdAt: { type: Date, default: Date.now },
 });
 

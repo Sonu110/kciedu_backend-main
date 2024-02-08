@@ -9,7 +9,7 @@ const Student = new mongoose.Schema({
     lastname:
     {
         type: String,
-        required: true,
+       
     
     },
     course:
@@ -25,7 +25,7 @@ const Student = new mongoose.Schema({
     confirmnumber:
     {
         type:String,
-        required: true,
+       
     },
 
 
@@ -94,6 +94,17 @@ const Student = new mongoose.Schema({
       type: String,
       default: '',
   },
+
+
+  Student: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "userdata",
+    required: true,
+  },
+
+
+
+
       },
       { timestamps: true }
 )

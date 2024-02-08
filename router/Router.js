@@ -12,7 +12,8 @@ const auth  = require('../middleware/auth');
 const AdminAuth = require('../middleware/Admin');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const Students = require('../Models/student');
-const StudentPayment = require('../Models/Stuentpayment')
+const StudentPayment = require('../Models/Stuentpayment');
+const Placement = require('../Models/Placement');
 
 const keys ="kci12345#$"
 const cloudinaryStorage = new CloudinaryStorage({
@@ -24,6 +25,7 @@ const cloudinaryStorage = new CloudinaryStorage({
 });
 
 Router.get('/', (req, res) => {
+
   res.send("Nice working correctly");
 });
 
@@ -110,7 +112,17 @@ Router.get('/logout', async (req, res) => {
   }
 });
 
+Router.get('/placement',async (req,res)=>{
 
+  try {
+      const Placementdata = await Placement.find({}).exec();
+      res.status(200).json({ data: Placementdata, success: true });
+  } catch (error) {
+      console.error('Error fetching course data:', error);
+      res.status(500).json({ data: "Error fetching course data", success: false });
+  }
+
+});
 
 const uploadsMiddleware = multer({ storage: cloudinaryStorage });
 
@@ -150,56 +162,7 @@ Router.get('/Allcoursedata', async (req, res) => {
   }
 });
 
-Router.post('/studentadmission', AdminAuth, uploadsMiddleware.fields([{ name: 'Files' }]),NewStudentHanddle )
 
-Router.get('/Allstudentdata', AdminAuth, async (req, res) => {
-  try {
-    let page = parseInt(req.query.page) || 1;
-    let pageSize = parseInt(req.query.pageSize) || 5;
-
-    const skipValue = (page - 1) * pageSize;
-
-    const totalRecords = await Students.countDocuments({}); // Count all records
-
-    const studentdata = await Students.find({}).skip(skipValue).limit(pageSize).exec();
-
-
-
-    res.status(200).json({ data: studentdata, total: totalRecords, success: true });
-  } catch (error) {
-    console.error('Error fetching student data:', error);
-    res.status(500).json({ data: "Error fetching student data", success: false });
-  }
-});
-
-Router.get('/searchStudents', AdminAuth, async (req, res) => {
-  try {
-    const searchTerm = req.query.searchTerm;
-
-    const studentdata = await Students.find({ firstname: { $regex: searchTerm, $options: 'i' } });
-
-    res.status(200).json({ data: studentdata, success: true });
-  } catch (error) {
-    console.error('Error searching students:', error);
-    res.status(500).json({ data: "Error searching students", success: false });
-  }
-});
-
-Router.delete('/deleteStudent/:id', AdminAuth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deletedStudent = await Students.findByIdAndDelete(id);
-
-    if (!deletedStudent) {
-      return res.status(404).json({ success: false, error: 'Student not found' });
-    }
-
-    res.status(200).json({ success: true, data: deletedStudent });
-  } catch (error) {
-    console.error('Error deleting student data:', error);
-    res.status(500).json({ success: false, error: 'Internal Server Error' });
-  }
-});
 
 Router.delete('/deletecourse/:id', AdminAuth, async (req, res) => {
   try {
@@ -218,60 +181,6 @@ Router.delete('/deletecourse/:id', AdminAuth, async (req, res) => {
 });
 
 
-Router.get('/getStudent/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const studentData = await Students.findById(id );
-
-    if (!studentData) {
-      return res.status(404).json({ success: false, error: 'Student not found' });
-    }
-
-    res.status(200).json({ success: true, data: studentData });
-  } catch (error) {
-    console.error('Error fetching student data:', error);
-    res.status(500).json({ success: false, error: 'Internal Server Error' });
-  }
-});
-
-
-Router.get('/getStudents/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const studentData = await Students.findOne({ StudentID: id });
-    const studentPaymentData = await StudentPayment.find({ studentId: id });
-
-    if (!studentData) {
-      return res.status(404).json({ success: false, error: 'Student not found' });
-    }
-
-    if (!studentPaymentData) {
-      return res.status(404).json({ success: false, error: 'Student payment data not found' });
-    }
-
-    res.status(200).json({ success: true, data: studentData, paymentsData: studentPaymentData });
-  } catch (error) {
-    console.error('Error fetching student data:', error);
-    res.status(500).json({ success: false, error: 'Internal Server Error' });
-  }
-});
-
-Router.get('/paymentupdatedata/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const studentData = await StudentPayment.findById({_id : id} );
- 
-    if (!studentData) {
-      return res.status(404).json({ success: false, error: 'Student not found' });
-    }
-
-    res.status(200).json({ success: true, data: studentData });
-  } catch (error) {
-    console.error('Error fetching student data:', error);
-    res.status(500).json({ success: false, error: 'Internal Server Error' });
-  }
-});
 
 
 
@@ -298,100 +207,6 @@ Router.post('/studentlogin', async (req, res) => {
   }
 });
 
-Router.post('/payments', AdminAuth, async (req, res) => {
-
-  
-  try {
-    const {
-      studentId,
-      studentName,
-      selectCourse,
-      totalAmount,
-      Receiptno,
-      paymentAmount,
-      totalBalance,
-      paymentMode,
-      note,
-    } = req.body;
-
-   
-
-    const newPayment = new StudentPayment({
-      studentId,
-      studentName,
-      selectCourse,
-      totalAmount,
-      receiptNo: Receiptno,
-      paymentAmount,
-      totalBalance,
-      paymentMode,
-      note,
-    });
-
-    const savedPayment = await newPayment.save();
-    res.json(savedPayment);
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-Router.put('/paymentsupdate/:id', AdminAuth, async (req, res) => {
-
-  try {
-    const paymentId = req.params.id;
-    const {
-      studentId,
-      studentName,
-      selectCourse,
-      totalAmount,
-      Receiptno,
-      paymentAmount,
-      totalBalance,
-      paymentMode,
-      note,
-    } = req.body;
-
-    const updatedPayment = await StudentPayment.findByIdAndUpdate(
-      paymentId,
-      {
-        $set: {
-          studentId,
-          studentName,
-          selectCourse,
-          totalAmount,
-          receiptNo: Receiptno,
-          paymentAmount,
-          totalBalance,
-          paymentMode,
-          note,
-        },
-      },
-      { new: true }
-    );
-
-    if (!updatedPayment) {
-      return res.status(404).json({ error: 'Payment not found' });
-    }
-
-    res.json(updatedPayment);
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-
-
-Router.get('/allpaymentreceipt', AdminAuth, async (req, res) => {
-  try {
-    const payemntrecipt = await StudentPayment.find({}).exec();
-    res.status(200).json({ data: payemntrecipt, success: true });
-  } catch (error) {
-    console.error('Error fetching course data:', error);
-    res.status(500).json({ data: "Error fetching course data", success: false });
-  }
-});
 
 
 
