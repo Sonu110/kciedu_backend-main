@@ -5,14 +5,12 @@ const jwt = require('jsonwebtoken');
 const User = require('../Models/user');
 const cloudinary = require('cloudinary').v2;
 const Courses = require('../Models/Course')
-const NewStudentHanddle = require('../controllers/Newstudent')
 const Updatestuentdata = require('../controllers/updatestudentdata')
 const multer = require('multer');
 const auth  = require('../middleware/auth');
 const AdminAuth = require('../middleware/Admin');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const Students = require('../Models/student');
-const StudentPayment = require('../Models/Stuentpayment');
 const Placement = require('../Models/Placement');
 
 const keys ="kci12345#$"

@@ -11,29 +11,50 @@ const Teacher = new mongoose.Schema({
         required: true,
         
       },
-     Email: {
-          type: String,
-          required: true,
-
-      },
-      password: {
+      knowledge:
+      {
         type: String,
         required: true,
-    
-    },
-Mobile: {
-      type: String,
+      },
+   
+    Mobile: {
+      type: Number,
       required: true,
   
   },
-   
-  isAdmin: {
-    type: Boolean,
-    default: false,
+  Gender: {
+    type: String,
+    default :"male"
   },
+
+  Branch: {
+    type: String,
+    default :'Roshan',
+  },
+  Salary: {
+    type: Number,
+    required: true
+  },
+  Joindate: {
+    type: String,
+    default :''
+  },
+  dob: {
+    type: String,
+    default :''
+  },
+
+  Address: {
+    type: String,
+    default :'',
+    required:true
+  },
+
+
   
+   
      
-        visitHistory: [{ timestamp: { type: Number } }],
+       
       },
       { timestamps: true }
 )

@@ -8,7 +8,8 @@
     const { CloudinaryStorage } = require('multer-storage-cloudinary');
     const Students = require('../Models/student');
     const StudentPayment = require('../Models/Stuentpayment')
-    const Placement = require('../Models/Placement')
+    const Placement = require('../Models/Placement');
+const Teachers = require('../Models/Teacher');
 
     const cloudinaryStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
@@ -288,5 +289,72 @@ Admin.delete('/placement/:id', async(req,res)=>{
     }
 
 })
+
+Admin.post('/newteacher',uploadsMiddleware.fields([{ name: 'Files' }]), async(req,res)=>{
+
+    try {
+       const{ name,
+        knowledge,
+        phone,
+        gender,
+        dob,
+        salary,
+        address,
+        branch
+       } = req.body;
+       console.log( req.body);
+
+       const Joindate = new Date().toLocaleDateString();
+
+       
+       if (req.files['Files']) {
+        photoPath = req.files['Files'][0].path;
+      }
+
+      const newteacher = new Teachers({
+        Name:name,
+        knowledge,
+        Mobile:phone,
+        Gender:gender,
+        dob,
+        Salary:salary,
+        Address:address,
+        Branch:branch,
+        Joindate:Joindate,
+        Image:photoPath||'',
+      })
+
+     await newteacher.save()
+
+     res.status(201).json({ success: true, Teacher: newteacher });
+        
+    } catch (error) {
+        console.error("error", error)
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+
+})
+
+Admin.get('/teacherdata', async(req,res)=>{
+
+    try {
+
+        const Teacherdata = await Teachers.find({}).exec();
+        
+        res.status(200).json({ data: Teacherdata, success: true });
+
+   
+        
+    } catch (error) {
+        console.error("error", error)
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+
+})
+
+
+
+
+
 
     module.exports = Admin;
