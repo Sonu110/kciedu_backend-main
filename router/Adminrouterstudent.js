@@ -335,7 +335,7 @@ Admin.post('/newteacher',uploadsMiddleware.fields([{ name: 'Files' }]), async(re
 
 })
 
-Admin.get('/teacherdata', async(req,res)=>{
+Admin.get('/staffdata', async(req,res)=>{
 
     try {
 
@@ -347,6 +347,44 @@ Admin.get('/teacherdata', async(req,res)=>{
         
     } catch (error) {
         console.error("error", error)
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+
+})
+Admin.get('/staffdata/:id', async(req,res)=>{
+
+    try {
+        const { id } = req.params;
+        const Teacherdata = await Teachers.findById({_id : id} );
+    
+        if (!Teacherdata) {
+        return res.status(404).json({ success: false, error: 'Student not found' });
+        }
+
+        res.status(200).json({ success: true, data: Teacherdata });
+    } catch (error) {
+        console.error('Error fetching student data:', error);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+
+})
+
+
+Admin.delete('/deleteteacher/:id', async(req,res)=>{
+
+    try {
+        const { id } = req.params;
+        const deletedTeacher = await Teachers.findByIdAndDelete(id);
+    
+        
+
+        if (!deletedTeacher) {
+        return res.status(404).json({ success: false, error: 'Student not found' });
+        }
+
+        res.status(200).json({ success: true, data: deletedTeacher });
+    } catch (error) {
+        console.error('Error deleting student data:', error);
         res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 

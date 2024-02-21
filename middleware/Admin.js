@@ -6,6 +6,11 @@
 
   
     try {
+      const tokendata = req.header('Authorization');
+    
+      if (!tokendata) {
+        return res.status(401).json({ error: 'Unauthorized', success: false });
+      }
       const token = req.header('Authorization').replace('Bearer ', '');
       const decoded = jwt.verify(token, keys);
       const user = await User.findOne({ _id: decoded._id, 'tokens.token': token });
