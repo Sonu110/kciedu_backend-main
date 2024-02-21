@@ -30,8 +30,6 @@ const User = require('../Models/user');
    
     Admin.get('/Allstudentdata', async (req, res) => {
 
-        console.log("the value of student", req.admin.rolls);
-      
         
 
     try {
@@ -294,7 +292,6 @@ Admin.delete('/placement/:id', async(req,res)=>{
 
     try {
         const { id } = req.params;
-        console.log("sdfsdfsd",id);
         const deletedStudent = await Placement.findByIdAndDelete(id);
     
         
@@ -323,7 +320,6 @@ Admin.post('/newteacher',uploadsMiddleware.fields([{ name: 'Files' }]), async(re
         address,
         branch
        } = req.body;
-       console.log( req.body);
 
        const Joindate = new Date().toLocaleDateString();
 
@@ -432,6 +428,45 @@ Admin.post('/adminform',async (req,res)=>{
 
 })
 
+Admin.put('/adminupdate/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findById(id);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Assuming isAdmin is a field in your user model
+        user.isAdmin = !user.isAdmin;
+        const updatedUser = await user.save();
+
+        res.json(updatedUser);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+Admin.delete('/adminupdatedelect/:id', async(req,res)=>{
+
+    try {
+        const { id } = req.params;
+        const deletedadmin = await User.findByIdAndDelete(id);
+    
+        
+
+        if (!deletedadmin) {
+        return res.status(404).json({ success: false, error: 'Student not found' });
+        }
+
+        res.status(200).json({ success: true, data: deletedadmin });
+    } catch (error) {
+        console.error('Error deleting student data:', error);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+
+})
 
 
 
