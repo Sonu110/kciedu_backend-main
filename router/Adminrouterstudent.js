@@ -1,6 +1,6 @@
     const express = require('express');
     const Admin = express.Router();
-
+    const bcrypt = require('bcrypt');
     const cloudinary = require('cloudinary').v2;
     const NewStudentHanddle = require('../controllers/Newstudent')
     const Updatestuentdata = require('../controllers/updatestudentdata')
@@ -10,6 +10,7 @@
     const StudentPayment = require('../Models/Stuentpayment')
     const Placement = require('../Models/Placement');
 const Teachers = require('../Models/Teacher');
+const User = require('../Models/user');
 
     const cloudinaryStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
@@ -28,6 +29,11 @@ const Teachers = require('../Models/Teacher');
     Admin.post('/studentadmission', uploadsMiddleware.fields([{ name: 'Files' }]),NewStudentHanddle )
    
     Admin.get('/Allstudentdata', async (req, res) => {
+
+        console.log("the value of student", req.admin.rolls);
+      
+        
+
     try {
         let page = parseInt(req.query.page) || 1;
         let pageSize = parseInt(req.query.pageSize) || 5;
@@ -36,10 +42,17 @@ const Teachers = require('../Models/Teacher');
 
         const totalRecords = await Students.countDocuments({ Student: req.admin._id }); // Count records for the specific admin
 
-        const studentdata = await Students.find({ Student: req.admin._id }).skip(skipValue).limit(pageSize).exec();
 
-
-        res.status(200).json({ data: studentdata, total: totalRecords, success: true });
+        if (req.admin.rolls === 'admin' && req.admin.isAdmin) {
+            const studentdata = await Students.find({ Student: req.admin._id }).skip(skipValue).limit(pageSize).exec();
+            return res.status(200).json({ data: studentdata, total: totalRecords, success: true });    
+        } else {
+            const studentdata = await Students.find().skip(skipValue).limit(pageSize).exec();
+            return res.status(200).json({ data: studentdata, total: totalRecords, success: true });
+        }
+        
+        
+        
     } catch (error) {
         console.error('Error fetching student data:', error);
         res.status(500).json({ data: "Error fetching student data", success: false });
@@ -233,8 +246,16 @@ const Teachers = require('../Models/Teacher');
 
     Admin.get('/allpaymentreceipt', async (req, res) => {
     try {
-        const payemntrecipt = await StudentPayment.find({ studentPaymentsdata: req.admin._id }).exec();
-        res.status(200).json({ data: payemntrecipt, success: true });
+
+        if (req.admin.rolls === 'admin' && req.admin.isAdmin) {
+                const payemntrecipt = await StudentPayment.find({ studentPaymentsdata: req.admin._id }).exec();
+          return  res.status(200).json({ data: payemntrecipt, success: true }); 
+        } else {
+            const payemntrecipt = await StudentPayment.find({}).exec();
+          return  res.status(200).json({ data: payemntrecipt, success: true });
+        }
+
+
     } catch (error) {
         console.error('Error fetching course data:', error);
         res.status(500).json({ data: "Error fetching course data", success: false });
@@ -390,6 +411,26 @@ Admin.delete('/deleteteacher/:id', async(req,res)=>{
 
 })
 
+
+Admin.post('/adminform',async (req,res)=>{
+
+    const { name, email, password } = req.body;
+    try {
+      const hashedPassword = await bcrypt.hash(password, 8);
+      const userdata = await User.create({
+          Name: name,
+          email: email,
+          password: hashedPassword,
+          isAdmin:true,
+          rolls:"admin"
+      });
+      res.json({ data: userdata, success: true }); 
+    } catch (error) {
+      console.error("Error during user creation:", error);
+      res.status(402).json({ data: "Something went wrong", success: false });
+    }
+
+})
 
 
 
